@@ -92,39 +92,7 @@ export const test = baseTest.extend<{
   },
 });
 
-/**
- * Vitest helper for tests that need a fresh temp folder per test.
- *
- * Usage:
- *   const getTmpFolder = useTmpFolder();
- *   test('...', async () => {
- *     const tmp = getTmpFolder();
- *   })
- */
-export function useTmpFolder(prefix = "unlibrary-"): () => string {
-  let tmpFolder: string | undefined;
-
-  beforeEach(async () => {
-    tmpFolder = await createTmpFolder(prefix);
-  });
-
-  afterEach(async () => {
-    if (tmpFolder) await cleanupDir(tmpFolder);
-    tmpFolder = undefined;
-  });
-
-  return () => {
-    if (!tmpFolder) {
-      throw new Error(
-        "Temporary folder not initialized yet. Call the getter from inside a test (after beforeEach has run).",
-      );
-    }
-
-    return tmpFolder;
-  };
-}
-
-export async function createProject(
+async function createProject(
   tmpFolder: string,
 ): Promise<{ dir: string }> {
   const dir = await mkdtemp(path.join(tmpFolder, "project-"));
