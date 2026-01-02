@@ -5,8 +5,8 @@
   "type": "module",
   "bin": "src/index.js",
   "imports": {
-    "#vitest": "./tests/utils.ts",
-    "#tests/*": "./tests/*"
+    "#utils/*": "./src/utils/*",
+    "#vitest": "./tests/utils.ts"
   },
   "scripts": {
     "unlibrary": "node src/index.js",
@@ -32,6 +32,7 @@
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "babel-remove-types": "^1.0.2",
+    "content-tag": "^4.1.0",
     "es-module-lexer": "^2.0.0",
     "latest-version": "^9.0.0"
   },

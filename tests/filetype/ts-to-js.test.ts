@@ -39,6 +39,7 @@ test("copies a TS file with a local import and external dependency", async ({
     [
       "package.json",
       "src/primitives/store.js",
+      "src/primitives/type-utils.js",
       "src/primitives/utils.js",
     ]
   `);

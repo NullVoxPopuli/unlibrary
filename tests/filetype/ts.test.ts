@@ -37,6 +37,7 @@ test("copies a TS file with a local import and external dependency", async ({
     [
       "package.json",
       "src/primitives/store.ts",
+      "src/primitives/type-utils.ts",
       "src/primitives/utils.ts",
     ]
   `);

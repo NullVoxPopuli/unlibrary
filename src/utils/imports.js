@@ -1,7 +1,11 @@
-import { isEmberVirtual } from "./info/ember.js";
+import { isEmberVirtual } from "./ember.js";
 
 export function isRelative(importPath) {
   return importPath.startsWith(".");
+}
+
+export function isParentRelative(importPath) {
+  return importPath.startsWith("..");
 }
 
 /**

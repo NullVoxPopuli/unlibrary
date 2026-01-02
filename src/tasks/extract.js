@@ -4,12 +4,14 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 
 import { log } from "@clack/prompts";
-import { removeTypes } from "babel-remove-types";
 import { init, parse } from "es-module-lexer";
 
+import { getImports } from "#utils/get-imports.js";
+import { removeTypes } from "#utils/remove-types.js";
+
 import { cwd } from "../consts.js";
-import { isRelative, isVirtual } from "../imports.js";
 import { cleanPath, isTSish, jsifyExtension } from "../path.js";
+import { isParentRelative, isRelative, isVirtual } from "../utils/imports.js";
 
 await init;
 
@@ -44,9 +46,10 @@ export async function extract({
  */
 async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
   let base = basename(fullPath);
+  const ext = extname(base);
 
   if (javascript) {
-    base = base.replace(/\.ts$/, ".js").replace(/\.gts$/, ".gjs");
+    base = jsifyExtension(base);
   }
 
   const destinationPath = join(cwd, outputFolder, base);
@@ -57,12 +60,12 @@ async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
   let contents = buffer.toString();
 
   if (!info.hasTypescript) {
-    contents = await removeTypes(contents);
+    contents = await removeTypes(ext, contents);
   }
 
-  const [imports, exports] = parse(contents);
-
-  const { external, relative } = filterImports({ imports, exports, info });
+  const { imports, exports, external, relative } = await getImports(contents, {
+    ext: extname(base),
+  });
 
   for (const dep of external) {
     info.addDep(dep);
@@ -75,9 +78,17 @@ async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
   for (const dep of relative) {
     const absolutePath = await resolveFile(dep, fullPath);
 
-    if (isTSish(dep) && javascript) {
-      const replacement = jsifyExtension(dep);
+    let replacement = dep;
 
+    if (isParentRelative(replacement)) {
+      replacement = `./${basename(replacement)}`;
+    }
+
+    if (isTSish(replacement) && javascript) {
+      replacement = jsifyExtension(replacement);
+    }
+
+    if (dep !== replacement) {
       pathsToWrite[dep] = replacement;
     }
 
@@ -118,38 +129,6 @@ async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
    * - crawl imports
    */
   await writeFile(destinationPath, contents);
-}
-
-function filterImports({ imports /* , exports, info */ }) {
-  const external = [];
-  const relative = [];
-
-  for (const { n: importPath } of imports) {
-    if (isRelative(importPath)) {
-      relative.push(importPath);
-      continue;
-    }
-
-    const depName = cleanImportPath(importPath);
-
-    if (isVirtual(depName)) continue;
-
-    external.push(depName);
-  }
-
-  return { external, relative };
-}
-
-export function cleanImportPath(importPath) {
-  if (importPath.startsWith("@")) {
-    const [scope, pkg] = importPath.split("/");
-
-    return `${scope}/${pkg}`;
-  }
-
-  const [pkg] = importPath.split("/");
-
-  return pkg;
 }
 
 const SUPPORTED_EXTENSIONS = new Set([
