@@ -2,12 +2,7 @@ import { stat } from "node:fs/promises";
 
 import { describe, expect } from "vitest";
 
-import {
-  createProject,
-  listDirDeep,
-  runCli,
-  test,
-} from "#tests/utils.js";
+import { listDirDeep, runCli, test } from "#tests/utils.js";
 
 describe("tmp folder setup", () => {
   test("creates a temporary directory", async ({ tmpFolder }) => {
@@ -26,9 +21,7 @@ describe("cli", () => {
   });
 });
 
-test("copies a TS file with no dependencies", async ({ tmpFolder }) => {
-  const { dir: projectDir } = await createProject(tmpFolder);
-
+test("copies a TS file with no dependencies", async ({ projectDir }) => {
   await runCli(
     [
       "--repo",

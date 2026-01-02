@@ -70,6 +70,7 @@ export async function cleanupDir(dir: string): Promise<void> {
 export const test = baseTest.extend<{
   tmpFolderPrefix: string;
   tmpFolder: string;
+  projectDir: string;
 }>({
   // Can be overridden per suite via `test.scoped({ tmpFolderPrefix: '...' })`
   tmpFolderPrefix: "unlibrary-",
@@ -82,6 +83,12 @@ export const test = baseTest.extend<{
     } finally {
       await cleanupDir(dir);
     }
+  },
+
+  projectDir: async ({ tmpFolder }, use) => {
+    const { dir } = await createProject(tmpFolder);
+
+    await use(dir);
   },
 });
 
@@ -153,7 +160,6 @@ export async function listDirDeep(
   rootDir: string,
   options: ListDirDeepOptions = {},
 ): Promise<string[]> {
-
   const {
     relativeTo = rootDir,
     includeDirs = false,
