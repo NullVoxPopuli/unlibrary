@@ -14,7 +14,7 @@
     "test:manual:js": "pnpm test:_:clean && pnpm test:_:manual --javascript",
     "test:_:clean": "rm -rf node_modules/.cache/unlibrary",
     "test:_:manual": "pnpm unlibrary --repo https://github.com/universal-ember/ember-primitives --filepath ./ember-primitives/src/store.ts --output-folder ./tmp/manual-app/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run"
   },
   "keywords": [
     "library",
@@ -41,6 +41,7 @@
     "@types/node": "^25.0.3",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }
