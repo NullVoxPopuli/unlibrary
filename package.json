@@ -10,8 +10,10 @@
     "lint:eslint": "eslint .",
     "lint:format": "prettier --check .",
     "format": "prettier --write .",
-    "test:clean": "rm -rf node_modules/.cache/unlibrary",
-    "test:manual": "pnpm unlibrary --repo https://github.com/universal-ember/ember-primitives --filepath ./ember-primitives/src/create-store.ts",
+    "test:manual": "pnpm test:_:clean && pnpm test:_:manual",
+    "test:manual:js": "pnpm test:_:clean && pnpm test:_:manual --javascript",
+    "test:_:clean": "rm -rf node_modules/.cache/unlibrary",
+    "test:_:manual": "pnpm unlibrary --repo https://github.com/universal-ember/ember-primitives --filepath ./ember-primitives/src/store.ts --output-folder ./tmp/manual-app/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -25,14 +27,20 @@
   "packageManager": "pnpm@10.27.0",
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "babel-remove-types": "^1.0.2"
+    "babel-remove-types": "^1.0.2",
+    "es-module-lexer": "^2.0.0",
+    "latest-version": "^9.0.0"
   },
   "engines": {
     "node": ">= 24.12.0"
   },
   "devDependencies": {
     "@nullvoxpopuli/eslint-configs": "^5.5.0",
+    "@tsconfig/node24": "^24.0.3",
+    "@tsconfig/strictest": "^2.0.8",
+    "@types/node": "^25.0.3",
     "eslint": "^9.39.2",
-    "prettier": "^3.7.4"
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   }
 }

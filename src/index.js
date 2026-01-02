@@ -4,7 +4,9 @@ import { parseArgs } from "node:util";
 
 import { cancel, intro, log, outro } from "@clack/prompts";
 
-import { cloneGitTag } from "./tasks/download.js";
+import { cloneGit } from "./tasks/download.js";
+import { extract } from "./tasks/extract.js";
+import { gatherProjectInfo } from "./tasks/gather.js";
 
 function printHelp() {
   intro(`unlibrary`);
@@ -15,20 +17,23 @@ function printHelp() {
 
 Usage:
 
-  unlibrary --repo <git repo URL> --tag <tag> --filepath <path-to-file-in-repo>
+  unlibrary --repo <URL> --tag <tag> --filepath <path> --output-folder <path>
 
 Example:
 
   unlibrary \\
     --repo https://github.com/universal-ember/ember-primitives \\
     --tag v0.49 \\
-    --filepath ember-primitives/src/create-store.ts
+    --filepath ember-primitives/src/create-store.ts \\
+    --output-folder ./src/primitives/
 
 Options:
 
-	--repo <repo-url>         Repository URL (alternative to positional)
-	--tag <tag-name>          Git tag name (alternative to positional)
-	--filepath <path>       Entrypoint file/path (alternative to positional)
+	--repo <repo-url>         Repository URL
+	--tag <tag-name>          Git tag name (optional) 
+	--filepath <path>         Entrypoint file/path
+	--output-folder <path>    The output folder relative to the current working directory to copy the files in to
+	--javascript              Flag to force JavaScript output if any TypeScript files are encountered 
 	-h, --help                Show help
 
 `);
@@ -48,6 +53,8 @@ const parsed = parseArgs({
     repo: { type: "string" },
     tag: { type: "string" },
     filepath: { type: "string" },
+    ["output-folder"]: { type: "string" },
+    javascript: { type: "boolean" },
     help: { type: "boolean", short: "h" },
   },
 });
@@ -60,21 +67,35 @@ if (parsed.values.help) {
 const repo = parsed.values.repo;
 // Default to "main", or whatever the default branch is.
 const tag = parsed.values.tag;
+const javascript = parsed.values.javascript;
 const filepath = parsed.values.filepath;
+const outputFolder = parsed.values["output-folder"];
 
-if (!repo || !filepath) {
+if (!repo || !filepath || !outputFolder) {
   const missing = [];
 
   if (!repo) missing.push("--repo");
   if (!filepath) missing.push("--filepath");
+  if (!outputFolder) missing.push("--outputFolder");
 
   exitWithError(`Missing required argument(s): ${missing.join(", ")}`);
 }
 
 intro("unlibrary");
 
-const { dir } = await cloneGitTag(repo, tag);
+const info = await gatherProjectInfo();
+const { dir } = await cloneGit(repo, tag);
 
-log.info(`You may browse the files yourself at any time in ${dir}`);
+await extract({
+  sourceFolder: dir,
+  info,
+  filepath,
+  outputFolder,
+  javascript,
+});
+
+log.info(`Finishing...`);
+
+await info.writeChanges();
 
 outro("✨ Ready ✨");

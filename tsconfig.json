@@ -1,0 +1,6 @@
+{
+  "extends": ["@tsconfig/node24", "@tsconfig/strictest"],
+  "compilerOptions": {
+    "allowJs": true
+  }
+}
