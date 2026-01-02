@@ -1,12 +1,10 @@
 # unlibrary
 
+The tool for ejecting library code into your project, so you never worry about 3rd party dependency compatibility.
+
+Automatically handles stripping TypeScript types for JavaScript projects.
 
 ```
-┌  unlibrary
-│
-●  The tool for ejecting library code into your project, so you never worry about 3rd party dependency compatibility.
-│
-●  
 │  Usage:
 │  
 │    unlibrary --repo <git repo URL> --tag <tag> --filepath <path-to-file-in-repo>
