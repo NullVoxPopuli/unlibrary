@@ -4,6 +4,9 @@
   "description": "",
   "type": "module",
   "bin": "src/index.js",
+  "imports": {
+    "#tests/*": "./tests/*"
+  },
   "scripts": {
     "unlibrary": "node src/index.js",
     "lint:fix": "pnpm lint:eslint --fix && pnpm format",
