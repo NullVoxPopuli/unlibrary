@@ -2,42 +2,42 @@
   "name": "unlibrary",
   "version": "0.0.1",
   "description": "",
-  "type": "module",
-  "bin": "src/index.js",
-  "imports": {
-    "#utils/*": "./src/utils/*",
-    "#vitest": "./tests/utils.ts"
-  },
-  "scripts": {
-    "unlibrary": "node src/index.js",
-    "lint:fix": "pnpm lint:eslint --fix && pnpm format",
-    "lint:eslint": "eslint .",
-    "lint:format": "prettier --check .",
-    "format": "prettier --write .",
-    "test:manual": "pnpm test:_:clean && pnpm test:_:manual",
-    "test:manual:js": "pnpm test:_:clean && pnpm test:_:manual --javascript",
-    "test:_:clean": "rm -rf node_modules/.cache/unlibrary",
-    "test:_:manual": "pnpm unlibrary --repo https://github.com/universal-ember/ember-primitives --filepath ./ember-primitives/src/store.ts --output-folder ./tmp/manual-app/",
-    "test": "vitest run"
-  },
   "keywords": [
     "library",
     "eject",
     "extract",
     "maintain yourself"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:NullVoxPopuli/unlibrary.git"
+  },
   "license": "MIT",
-  "packageManager": "pnpm@10.27.0",
+  "author": "",
+  "type": "module",
+  "imports": {
+    "#utils/*": "./src/utils/*",
+    "#vitest": "./tests/utils.ts"
+  },
+  "bin": "src/index.js",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint:eslint": "eslint .",
+    "lint:fix": "pnpm lint:eslint --fix && pnpm format",
+    "lint:format": "prettier --check .",
+    "test": "vitest run",
+    "test:_:clean": "rm -rf node_modules/.cache/unlibrary",
+    "test:_:manual": "pnpm unlibrary --repo https://github.com/universal-ember/ember-primitives --filepath ./ember-primitives/src/store.ts --output-folder ./tmp/manual-app/",
+    "test:manual": "pnpm test:_:clean && pnpm test:_:manual",
+    "test:manual:js": "pnpm test:_:clean && pnpm test:_:manual --javascript",
+    "unlibrary": "node src/index.js"
+  },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "babel-remove-types": "^1.0.2",
     "content-tag": "^4.1.0",
     "es-module-lexer": "^2.0.0",
     "latest-version": "^9.0.0"
-  },
-  "engines": {
-    "node": ">= 24.12.0"
   },
   "devDependencies": {
     "@nullvoxpopuli/eslint-configs": "^5.5.0",
@@ -46,7 +46,12 @@
     "@types/node": "^25.0.3",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
+    "release-plan": "^0.17.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
+  },
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": ">= 24.12.0"
   }
 }
