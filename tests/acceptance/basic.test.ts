@@ -2,7 +2,7 @@ import { stat } from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { cleanupDir, createProject, createTmpFolder, listDirDeep, runCli } from './utils.js';
+import { cleanupDir, createProject, createTmpFolder, listDirDeep, runCli } from '#tests/utils.js';
 
 let tmpFolder: string;
 

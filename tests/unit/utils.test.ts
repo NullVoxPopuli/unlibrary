@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-import { cleanupDir, createTmpFolder, listDirDeep } from '../acceptance/utils.js';
+import { cleanupDir, createTmpFolder, listDirDeep } from '#tests/utils.js';
 
 describe('listDirDeep', () => {
 	test('lists files recursively (default: files only)', async () => {
