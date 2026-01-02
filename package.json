@@ -6,8 +6,12 @@
   "bin": "src/index.js",
   "scripts": {
     "unlibrary": "node src/index.js",
+    "lint:fix": "pnpm lint:eslint --fix && pnpm format",
+    "lint:eslint": "eslint .",
     "lint:format": "prettier --check .",
     "format": "prettier --write .",
+    "test:clean": "rm -rf node_modules/.cache/unlibrary",
+    "test:manual": "pnpm unlibrary --repo https://github.com/universal-ember/ember-primitives --filepath ./ember-primitives/src/create-store.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -25,5 +29,10 @@
   },
   "engines": {
     "node": ">= 24.12.0"
+  },
+  "devDependencies": {
+    "@nullvoxpopuli/eslint-configs": "^5.5.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4"
   }
 }
