@@ -22,6 +22,7 @@ export function cachePathFor(name, tag) {
 
 /*******************************
  *
+ * Helpers
  *
  * ****************************/
 
