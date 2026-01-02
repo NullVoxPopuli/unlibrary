@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { afterEach, beforeEach, test as baseTest } from "vitest";
+import { test as baseTest } from "vitest";
 
 export const CLI_PATH = fileURLToPath(
   new URL("../src/index.js", import.meta.url),
@@ -14,6 +14,13 @@ export type RunCliResult = {
   exitCode: number | null;
   stdout: string;
   stderr: string;
+};
+
+export type UnlibraryArgs = {
+  repo: string;
+  filepath: string;
+  outputFolder: string;
+  javascript?: boolean;
 };
 
 export async function runCli(
@@ -71,6 +78,7 @@ export const test = baseTest.extend<{
   tmpFolderPrefix: string;
   tmpFolder: string;
   projectDir: string;
+  unlibrary: (args: UnlibraryArgs) => Promise<RunCliResult>;
 }>({
   // Can be overridden per suite via `test.scoped({ tmpFolderPrefix: '...' })`
   tmpFolderPrefix: "unlibrary-",
@@ -89,6 +97,23 @@ export const test = baseTest.extend<{
     const { dir } = await createProject(tmpFolder);
 
     await use(dir);
+  },
+
+  unlibrary: async ({ projectDir }, use) => {
+    await use(async ({ repo, filepath, outputFolder, javascript }) => {
+      const args = [
+        "--repo",
+        repo,
+        "--filepath",
+        filepath,
+        "--output-folder",
+        outputFolder,
+      ];
+
+      if (javascript) args.push("--javascript");
+
+      return await runCli(args, { cwd: projectDir });
+    });
   },
 });
 

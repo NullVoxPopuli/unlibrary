@@ -1,19 +1,13 @@
 import { expect } from "vitest";
 
-import { listDirDeep, runCli, test } from "#tests/utils.js";
+import { listDirDeep, test } from "#tests/utils.js";
 
-test("copies a TS file with no dependencies", async ({ projectDir }) => {
-  await runCli(
-    [
-      "--repo",
-      "https://github.com/universal-ember/ember-primitives",
-      "--filepath",
-      "./ember-primitives/src/qp.ts",
-      "--output-folder",
-      "./src/primitives/",
-    ],
-    { cwd: projectDir },
-  );
+test("copies a TS file with no dependencies", async ({ projectDir, unlibrary }) => {
+  await unlibrary({
+    repo: "https://github.com/universal-ember/ember-primitives",
+    filepath: "./ember-primitives/src/qp.ts",
+    outputFolder: "./src/primitives/",
+  });
 
   expect(await listDirDeep(projectDir)).toMatchInlineSnapshot(`
 		[
