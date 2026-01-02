@@ -1,0 +1,29 @@
+{
+  "name": "unlibrary",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "bin": "src/index.js",
+  "scripts": {
+    "unlibrary": "node src/index.js",
+    "lint:format": "prettier --check .",
+    "format": "prettier --write .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "library",
+    "eject",
+    "extract",
+    "maintain yourself"
+  ],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.27.0",
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "babel-remove-types": "^1.0.2"
+  },
+  "engines": {
+    "node": ">= 24.12.0"
+  }
+}
