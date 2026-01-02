@@ -60,11 +60,8 @@ export async function cleanupDir(dir: string): Promise<void> {
 export async function createProject(
   tmpFolder: string,
 ): Promise<{ dir: string }> {
-  // Must be inside the per-test tmp folder so it gets cleaned up automatically.
   const dir = await mkdtemp(path.join(tmpFolder, "project-"));
 
-  // Provide the minimum required for the CLI's project detection.
-  // Include `typescript` so the tool treats this as a TS project and preserves TS.
   const manifest = {
     name: "test-project",
     private: true,
@@ -86,28 +83,17 @@ export async function createProject(
 }
 
 export type ListDirDeepOptions = {
-  /**
-   * Base directory used for returned paths.
-   * Defaults to the `rootDir` passed to `listDirDeep`.
-   */
   relativeTo?: string;
-  /** Include directory entries in the returned list (defaults to false). */
   includeDirs?: boolean;
-  /** Include file entries in the returned list (defaults to true). */
   includeFiles?: boolean;
-  /** Directory names to skip entirely (defaults to ['node_modules']). */
   ignoreDirNames?: string[];
 };
 
-/**
- * Recursively lists the contents of a directory.
- *
- * Returns a stable, sorted array of paths relative to `options.relativeTo` (posix-style `/`).
- */
 export async function listDirDeep(
   rootDir: string,
   options: ListDirDeepOptions = {},
 ): Promise<string[]> {
+
   const {
     relativeTo = rootDir,
     includeFiles = true,
@@ -120,7 +106,6 @@ export async function listDirDeep(
   const toRel = (absPath: string) => {
     const rel = path.relative(relativeTo, absPath);
 
-    // Keep results consistent across platforms.
     return rel.split(path.sep).join("/");
   };
 
