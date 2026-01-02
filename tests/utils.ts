@@ -1,10 +1,19 @@
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile as fsReadFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { test as baseTest } from "vitest";
+import { expect as hardExpect, test as baseTest } from "vitest";
+
+export const expect = hardExpect.soft;
 
 export const CLI_PATH = fileURLToPath(
   new URL("../src/index.js", import.meta.url),
@@ -117,9 +126,7 @@ export const test = baseTest.extend<{
   },
 });
 
-async function createProject(
-  tmpFolder: string,
-): Promise<{ dir: string }> {
+async function createProject(tmpFolder: string): Promise<{ dir: string }> {
   const dir = await mkdtemp(path.join(tmpFolder, "project-"));
 
   const manifest = {
@@ -192,4 +199,23 @@ export async function listDirDeep(
   results.sort();
 
   return results;
+}
+
+export async function readDeps(projectDir: string): Promise<string[]> {
+  const manifestPath = path.join(projectDir, "package.json");
+  const str = await readFile(manifestPath);
+  const manifest = JSON.parse(str);
+  const result = Object.keys({
+    ...manifest.dependencies,
+    ...manifest.devDependencies,
+    ...manifest.peerDependencies,
+  }).sort();
+
+  return result;
+}
+
+export async function readFile(filePath: string): Promise<string> {
+  const buffer = await fsReadFile(filePath);
+
+  return buffer.toString();
 }

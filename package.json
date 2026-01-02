@@ -5,6 +5,7 @@
   "type": "module",
   "bin": "src/index.js",
   "imports": {
+    "#vitest": "./tests/utils.ts",
     "#tests/*": "./tests/*"
   },
   "scripts": {

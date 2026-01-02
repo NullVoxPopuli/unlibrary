@@ -1,6 +1,6 @@
 import { describe, expect } from "vitest";
-import { runCli, test } from "#tests/utils.js";
 
+import { runCli, test } from "#tests/utils.js";
 
 describe("cli", () => {
   test("--help exits cleanly", async () => {

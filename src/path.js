@@ -20,6 +20,22 @@ export function cachePathFor(name, tag) {
   return dir;
 }
 
+export function isTSish(path) {
+  return path.endsWith(".ts") || path.endsWith(".gts");
+}
+
+export function jsifyExtension(path) {
+  if (path.endsWith(".ts")) {
+    return path.replace(/\.ts$/, ".js");
+  }
+
+  if (path.endsWith(".gts")) {
+    return path.replace(/\.gts$/, ".gjs");
+  }
+
+  return path;
+}
+
 /*******************************
  *
  * Helpers
