@@ -34,8 +34,8 @@ export async function gatherProjectInfo() {
   return {
     manifest,
     manifestPath,
-    hasVite: hasVite(deps),
-    hasTypescript: hasTypescript(deps),
+    hasVite: hasDep("vite"),
+    hasTypescript: hasDep("typescript"),
     hasDep,
     addDep(name) {
       if (hasDep(name)) return;
@@ -56,32 +56,4 @@ export async function gatherProjectInfo() {
       await writeFile(manifestPath, data);
     },
   };
-}
-
-/*******************************
- *
- * Helpers
- *
- * ****************************/
-
-function hasTypescript(deps) {
-  if (!deps["typescript"]) {
-    return false;
-  }
-
-  /**
-   * Do we need more logic?
-   */
-  return true;
-}
-
-function hasVite(deps) {
-  if (!deps["vite"]) {
-    return false;
-  }
-
-  /**
-   * Do we need more logic?
-   */
-  return true;
 }

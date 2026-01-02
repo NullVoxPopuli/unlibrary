@@ -1,15 +1,17 @@
 import assert from "node:assert";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { basename, dirname, extname, join } from "node:path";
 
 import { log } from "@clack/prompts";
-import { removeTypes } from "babel-remove-types";
 import { init, parse } from "es-module-lexer";
 
+import { getImports } from "#utils/get-imports.js";
+import { removeTypes } from "#utils/remove-types.js";
+
 import { cwd } from "../consts.js";
-import { isRelative, isVirtual } from "../imports.js";
-import { cleanPath } from "../path.js";
+import { cleanPath, isTSish, jsifyExtension } from "../path.js";
+import { isParentRelative, isRelative, isVirtual } from "../utils/imports.js";
 
 await init;
 
@@ -44,9 +46,10 @@ export async function extract({
  */
 async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
   let base = basename(fullPath);
+  const ext = extname(base);
 
   if (javascript) {
-    base = base.replace(/\.ts$/, ".js").replace(/\.gts$/, ".gjs");
+    base = jsifyExtension(base);
   }
 
   const destinationPath = join(cwd, outputFolder, base);
@@ -57,15 +60,67 @@ async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
   let contents = buffer.toString();
 
   if (!info.hasTypescript) {
-    contents = await removeTypes(contents, false);
+    contents = await removeTypes(ext, contents);
   }
 
-  const [imports, exports] = parse(contents);
+  const { imports, exports, external, relative } = await getImports(contents, {
+    ext: extname(base),
+  });
 
-  const deps = findDependencies({ imports, exports, info });
-
-  for (const dep of deps) {
+  for (const dep of external) {
     info.addDep(dep);
+  }
+
+  const pathsToWrite = {
+    /* original => new */
+  };
+
+  for (const dep of relative) {
+    const absolutePath = await resolveFile(dep, fullPath);
+
+    let replacement = dep;
+
+    if (isParentRelative(replacement)) {
+      replacement = `./${basename(replacement)}`;
+    }
+
+    if (isTSish(replacement) && javascript) {
+      replacement = jsifyExtension(replacement);
+    }
+
+    if (dep !== replacement) {
+      pathsToWrite[dep] = replacement;
+    }
+
+    await importBasedCopy({
+      info,
+      javascript,
+      fullPath: absolutePath,
+      outputFolder,
+    });
+  }
+
+  // Rewrite module specifiers using es-module-lexer indices.
+  // As we mutate `contents`, we track a running offset.
+  let offset = 0;
+
+  for (const { n: original, s, e } of imports) {
+    const replacement = pathsToWrite[original];
+
+    if (!replacement) continue;
+
+    const start = s + offset;
+    const end = e + offset;
+    const existing = contents.slice(start, end);
+
+    // If this trips, the indices likely refer to a different slice than expected.
+    assert(
+      existing === original,
+      `Unexpected import slice at [${start}, ${end}): expected '${original}', got '${existing}'`,
+    );
+
+    contents = `${contents.slice(0, start)}${replacement}${contents.slice(end)}`;
+    offset += replacement.length - (e - s);
   }
 
   /**
@@ -76,30 +131,42 @@ async function importBasedCopy({ info, javascript, fullPath, outputFolder }) {
   await writeFile(destinationPath, contents);
 }
 
-function findDependencies({ imports /* , exports, info */ }) {
-  const result = [];
+const SUPPORTED_EXTENSIONS = new Set([
+  ".js",
+  ".ts",
+  ".gts",
+  ".json",
+  ".mjs",
+  ".cjs",
+  ".gjs",
+  ".css",
+]);
 
-  for (const { n: importPath } of imports) {
-    if (isRelative(importPath)) continue;
+async function resolveFile(importPath, fromPath) {
+  const fromDir = dirname(fromPath);
+  const existingExtension = extname(importPath);
 
-    const depName = cleanImportPath(importPath);
+  if (existingExtension) {
+    const candidate = join(fromDir, importPath);
 
-    if (isVirtual(depName)) continue;
+    assert(
+      existsSync(candidate),
+      `Unable to resolve import '${importPath}' from ${cleanPath(fromPath)} (tried ${cleanPath(candidate)})`,
+    );
 
-    result.push(importPath);
+    return candidate;
   }
 
-  return result;
-}
+  for (const extension of SUPPORTED_EXTENSIONS) {
+    const candidate = join(fromDir, `${importPath}${extension}`);
 
-export function cleanImportPath(importPath) {
-  if (importPath.startsWith("@")) {
-    const [scope, pkg] = importPath.split("/");
-
-    return `${scope}/${pkg}`;
+    if (existsSync(candidate)) {
+      return candidate;
+    }
   }
 
-  const [pkg] = importPath.split("/");
-
-  return pkg;
+  assert(
+    false,
+    `Unable to resolve import '${importPath}' from ${cleanPath(fromPath)} (tried extensions: ${[...SUPPORTED_EXTENSIONS].join(", ")})`,
+  );
 }
