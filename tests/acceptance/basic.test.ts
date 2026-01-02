@@ -1,27 +1,16 @@
 import { stat } from "node:fs/promises";
 
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { describe, expect } from "vitest";
 
 import {
-  cleanupDir,
   createProject,
-  createTmpFolder,
   listDirDeep,
   runCli,
+  test,
 } from "#tests/utils.js";
 
-let tmpFolder: string;
-
-beforeEach(async () => {
-  tmpFolder = await createTmpFolder();
-});
-
-afterEach(async () => {
-  await cleanupDir(tmpFolder);
-});
-
 describe("tmp folder setup", () => {
-  test("creates a temporary directory", async () => {
+  test("creates a temporary directory", async ({ tmpFolder }) => {
     const stats = await stat(tmpFolder);
 
     expect(stats.isDirectory()).toBe(true);
@@ -37,7 +26,7 @@ describe("cli", () => {
   });
 });
 
-test("copies a TS file with no dependencies", async () => {
+test("copies a TS file with no dependencies", async ({ tmpFolder }) => {
   const { dir: projectDir } = await createProject(tmpFolder);
 
   await runCli(

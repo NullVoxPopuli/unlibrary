@@ -4,8 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { afterEach, beforeEach, test as baseTest } from "vitest";
+
 export const CLI_PATH = fileURLToPath(
-  new URL("../../src/index.js", import.meta.url),
+  new URL("../src/index.js", import.meta.url),
 );
 
 export type RunCliResult = {
@@ -57,6 +59,64 @@ export async function cleanupDir(dir: string): Promise<void> {
   await rm(dir, { recursive: true, force: true });
 }
 
+/**
+ * Extended `test` with fixtures.
+ *
+ * Docs: https://vitest.dev/guide/test-context.html#extend-test-context
+ *
+ * Note: Vitest requires destructuring the context argument for fixtures to work:
+ *   test('...', ({ tmpFolder }) => { ... })
+ */
+export const test = baseTest.extend<{
+  tmpFolderPrefix: string;
+  tmpFolder: string;
+}>({
+  // Can be overridden per suite via `test.scoped({ tmpFolderPrefix: '...' })`
+  tmpFolderPrefix: "unlibrary-",
+
+  tmpFolder: async ({ tmpFolderPrefix }, use) => {
+    const dir = await createTmpFolder(tmpFolderPrefix);
+
+    try {
+      await use(dir);
+    } finally {
+      await cleanupDir(dir);
+    }
+  },
+});
+
+/**
+ * Vitest helper for tests that need a fresh temp folder per test.
+ *
+ * Usage:
+ *   const getTmpFolder = useTmpFolder();
+ *   test('...', async () => {
+ *     const tmp = getTmpFolder();
+ *   })
+ */
+export function useTmpFolder(prefix = "unlibrary-"): () => string {
+  let tmpFolder: string | undefined;
+
+  beforeEach(async () => {
+    tmpFolder = await createTmpFolder(prefix);
+  });
+
+  afterEach(async () => {
+    if (tmpFolder) await cleanupDir(tmpFolder);
+    tmpFolder = undefined;
+  });
+
+  return () => {
+    if (!tmpFolder) {
+      throw new Error(
+        "Temporary folder not initialized yet. Call the getter from inside a test (after beforeEach has run).",
+      );
+    }
+
+    return tmpFolder;
+  };
+}
+
 export async function createProject(
   tmpFolder: string,
 ): Promise<{ dir: string }> {
@@ -96,6 +156,7 @@ export async function listDirDeep(
 
   const {
     relativeTo = rootDir,
+    includeDirs = false,
     includeFiles = true,
     ignoreDirNames = ["node_modules"],
   } = options;
@@ -119,6 +180,7 @@ export async function listDirDeep(
       const rel = toRel(abs);
 
       if (dirent.isDirectory()) {
+        if (includeDirs) results.push(rel);
         await walk(abs);
         continue;
       }
