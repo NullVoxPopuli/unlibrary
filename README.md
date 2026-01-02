@@ -7,20 +7,24 @@ Automatically handles stripping TypeScript types for JavaScript projects.
 ```
 │  Usage:
 │
-│    unlibrary --repo <git repo URL> --tag <tag> --filepath <path-to-file-in-repo>
+│    unlibrary --repo <URL> --tag <tag> --filepath <path> --output-folder <path>
 │
 │  Example:
 │
 │    unlibrary \
 │      --repo https://github.com/universal-ember/ember-primitives \
 │      --tag v0.49 \
-│      --filepath ember-primitives/src/create-store.ts
+│      --filepath ember-primitives/src/create-store.ts \
+│      --output-folder ./src/primitives/
 │
 │  Options:
 │
-│  	--repo <repo-url>         Repository URL (alternative to positional)
-│  	--tag <tag-name>          Git tag name (alternative to positional)
-│  	--filepath <path>       Entrypoint file/path (alternative to positional)
+│  	--repo <repo-url>         Repository URL
+│  	--tag <tag-name>          Git tag name (optional)
+│  	--filepath <path>         Entrypoint file/path
+│  	--output-folder <path>    The output folder relative to the current working directory to copy the files in to
+│  	--javascript              Flag to force JavaScript output if any TypeScript files are encountered
 │  	-h, --help                Show help
+│
 │
 ```
