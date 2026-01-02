@@ -77,3 +77,11 @@ describe('cli', () => {
 });
 
 
+test('copies a TS file with no dependencies', async () => {
+    let { dir: projectDir } = await createProject();
+    await runCli([
+         '--repo', 'https://github.com/universal-ember/ember-primitives', 
+         '--filepath', './ember-primitives/src/qp.ts', 
+         '--output-folder', './src/primitives/',
+    ], { cwd: projectDir });
+});
